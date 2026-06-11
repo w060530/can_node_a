@@ -58,7 +58,7 @@
 extern TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN EV */
-
+extern CAN_HandleTypeDef hcan;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -174,5 +174,15 @@ void TIM4_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+/**
+  * @brief CAN1 RX0 中断处理函数（FIFO0 消息挂起中断）
+  * @note  调用 HAL_CAN_IRQHandler → 自动触发 HAL_CAN_RxFifo0MsgPendingCallback
+  *        回调中通过 osMessageQueuePut 将消息转发到 FreeRTOS 队列
+  */
+void CAN1_RX0_IRQHandler(void)
+{
+    HAL_CAN_IRQHandler(&hcan);
+}
 
 /* USER CODE END 1 */

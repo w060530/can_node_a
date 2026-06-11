@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "can_app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,6 +58,19 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/**
+  * @brief   输出一个字符到 USART1（printf 重定向核心函数）
+  * @param   ch   待输出的字符
+  * @retval  返回字符本身
+  * @note    syscalls.c 中的 _write() 会逐个字符调用此函数
+  *          此函数覆盖了 syscalls.c 中 __weak 的默认空实现
+  */
+int __io_putchar(int ch)
+{
+    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
 
 /* USER CODE END 0 */
 
@@ -93,6 +106,20 @@ int main(void)
   MX_CAN_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  /* 初始化 CAN 应用层：启动 CAN + 使能 RX 中断 + 初始化通信状态 */
+  if (CAN_App_Init() != 0)
+  {
+      Error_Handler();  /* CAN 启动失败，进入异常处理 */
+  }
+
+  /* 上电日志（通过串口输出，确认系统启动） */
+  printf("\r\n========================================\r\n");
+  printf("  CAN Node A 启动\r\n");
+  printf("  MCU: STM32F103C8T6\r\n");
+  printf("  CAN: 500Kbps, ID=0x100/0x101\r\n");
+  printf("  FreeRTOS: V10.3.1, CMSIS-V2\r\n");
+  printf("========================================\r\n");
 
   /* USER CODE END 2 */
 
