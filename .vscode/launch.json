@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "stlinkgdbtarget",
+            "request": "launch",
+            "name": "ST-LINK: STM32Cube GDB",
+            "origin": "snippet",
+            "cwd": "${workspaceFolder}",
+            "preBuild": "${command:st-stm32-ide-debug-launch.build}",
+            "runEntry": "main",
+            "imagesAndSymbols": [
+                {
+                    "imageFileName": "${command:st-stm32-ide-debug-launch.get-projects-binary-from-context1}"
+                }
+            ]
+        },
+        {
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "PWLINK: pyOCD (CMSIS-DAP)",
+            "servertype": "pyocd",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/Debug/${workspaceFolderBasename}.elf",
+            "device": "stm32f103c8tx",
+            "configFiles": [],
+            "serverpath": "C:/Users/31261/AppData/Roaming/Python/Python310/Scripts/pyocd-gdbserver.exe",
+            "runToEntryPoint": "main"
+        }
+    ]
+}
