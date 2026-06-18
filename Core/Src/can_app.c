@@ -84,9 +84,8 @@ int CAN_App_SendFrame(uint32_t std_id, const uint8_t *data, uint8_t dlc)
         return -1;
     }
 
-    /* 更新发送统计 */
+    /* 更新最后发送时间戳（帧类型计数由调用方维护） */
     g_comm_status.last_tx_tick = HAL_GetTick();
-    g_comm_status.tx_heartbeat_cnt++;   /* 通用计数，调用方可根据帧类型二次分类 */
 
     return 0;
 }
@@ -148,8 +147,9 @@ void CAN_App_ProcessRxMsg(const can_msg_t *msg)
 
                     if (seq != expected)
                     {
-                        /* 序列号不连续 → 丢帧 */
+                        /* 序列号不连续 → 丢帧，设置告警标志 */
                         g_comm_status.heartbeat_lost++;
+                        g_comm_status.local_state |= HEARTBEAT_FLAG_WARNING;
                     }
                 }
                 /* 记录本次序列号 */

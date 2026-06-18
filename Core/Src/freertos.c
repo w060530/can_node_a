@@ -170,17 +170,16 @@ __weak void CanTxTask1(void *argument)
         g_comm_status.peer_online = 0;                   /* 对方离线 */
       }
 
-      /* 序列号 0~255 循环递增 */
+      /* 序列号 0~255 循环递增（uint8_t 自然溢出回绕） */
       g_comm_status.heartbeat_seq_tx++;
-      if (g_comm_status.heartbeat_seq_tx > 255)
-      {
-        g_comm_status.heartbeat_seq_tx = 0;
-      }
 
       /* 构造并发送心跳帧 */
       CAN_Protocol_BuildHeartbeat(CAN_ID_HEARTBEAT_A, data,
                                    heartbeat_flags, g_comm_status.heartbeat_seq_tx);
       CAN_App_SendFrame(CAN_ID_HEARTBEAT_A, data, 8);
+
+      /* 帧类型计数 */
+      g_comm_status.tx_heartbeat_cnt++;
     }
 
     /* ---- 传感器帧：每 500ms 发送一次 ---- */
@@ -194,14 +193,20 @@ __weak void CanTxTask1(void *argument)
         last_sensor_tick = HAL_GetTick();
 
         /* 模拟传感器数据变化 */
-        sensor_val1++;    /* 模拟温度：缓慢上升 */
-        sensor_val2--;    /* 模拟湿度：缓慢下降 */
+        sensor_val1++;    /* 模拟温度：缓慢上升，uint16_t 溢出自动回绕 */
+        if (sensor_val2 > 0)
+        {
+            sensor_val2--;    /* 模拟湿度：缓慢下降，避免下溢 */
+        }
 
         /* 构造并发送传感器帧 */
         CAN_Protocol_BuildSensor(CAN_ID_SENSOR_A, data,
                                   g_comm_status.heartbeat_seq_tx,
                                   sensor_val1, sensor_val2);
         CAN_App_SendFrame(CAN_ID_SENSOR_A, data, 8);
+
+        /* 帧类型计数 */
+        g_comm_status.tx_sensor_cnt++;
       }
     }
 
