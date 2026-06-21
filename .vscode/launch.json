@@ -7,6 +7,7 @@
             "name": "ST-LINK: STM32Cube GDB",
             "origin": "snippet",
             "cwd": "${workspaceFolder}",
+            "preLaunchTask": "清理残留 ST-LINK 进程",
             "preBuild": "${command:st-stm32-ide-debug-launch.build}",
             "runEntry": "main",
             "imagesAndSymbols": [
